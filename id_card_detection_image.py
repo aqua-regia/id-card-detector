@@ -17,7 +17,8 @@ from utils import visualization_utils as vis_util
 
 # Name of the directory containing the object detection module we're using
 MODEL_NAME = 'model'
-IMAGE_NAME = 'test_images/image1.png'
+IMAGE_NAME = 'test_images/image5.png'
+OUTPUT_IMAGE_NAME = 'test_images/output5.png'
 
 # Grab path to current working directory
 CWD_PATH = os.getcwd()
@@ -31,6 +32,7 @@ PATH_TO_LABELS = os.path.join(CWD_PATH,'data','labelmap.pbtxt')
 
 # Path to image
 PATH_TO_IMAGE = os.path.join(CWD_PATH,IMAGE_NAME)
+OUTPUT_PATH = os.path.join(CWD_PATH,OUTPUT_IMAGE_NAME)
 
 # Number of classes the object detector can identify
 NUM_CLASSES = 1
@@ -101,12 +103,12 @@ im_width, im_height = shape[1], shape[0]
 (left, right, top, bottom) = (xmin * im_width, xmax * im_width, ymin * im_height, ymax * im_height)
 
 # Using Image to crop and save the extracted copied image
-im = Image.open(image_path)
-im.crop((left, top, right, bottom)).save(output_path, quality=95)
+im = Image.open(PATH_TO_IMAGE)
+im.crop((left, top, right, bottom)).save(OUTPUT_PATH, quality=95)
 
 cv2.imshow('ID-CARD-DETECTOR : ', image)
 
-image_cropped = cv2.imread(output_path)
+image_cropped = cv2.imread(OUTPUT_PATH)
 cv2.imshow("ID-CARD-CROPPED : ", image_cropped)
 
 # All the results have been drawn on image. Now display the image.
