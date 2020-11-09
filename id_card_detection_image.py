@@ -1,11 +1,10 @@
-
 # Import packages
 import os
+import sys
+
 import cv2
 import numpy as np
 import tensorflow as tf
-import sys
-
 from PIL import Image
 
 # This is needed since the notebook is stored in the object_detection folder.
@@ -25,14 +24,14 @@ CWD_PATH = os.getcwd()
 
 # Path to frozen detection graph .pb file, which contains the model that is used
 # for object detection.
-PATH_TO_CKPT = os.path.join(CWD_PATH,MODEL_NAME,'frozen_inference_graph.pb')
+PATH_TO_CKPT = os.path.join(CWD_PATH, MODEL_NAME, 'frozen_inference_graph.pb')
 
 # Path to label map file
-PATH_TO_LABELS = os.path.join(CWD_PATH,'data','labelmap.pbtxt')
+PATH_TO_LABELS = os.path.join(CWD_PATH, 'data', 'labelmap.pbtxt')
 
 # Path to image
-PATH_TO_IMAGE = os.path.join(CWD_PATH,IMAGE_NAME)
-OUTPUT_PATH = os.path.join(CWD_PATH,OUTPUT_IMAGE_NAME)
+PATH_TO_IMAGE = os.path.join(CWD_PATH, IMAGE_NAME)
+OUTPUT_PATH = os.path.join(CWD_PATH, OUTPUT_IMAGE_NAME)
 
 # Number of classes the object detector can identify
 NUM_CLASSES = 1

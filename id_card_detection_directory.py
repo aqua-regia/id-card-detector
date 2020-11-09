@@ -7,7 +7,6 @@ from os.path import isfile, join
 import cv2
 import numpy as np
 import tensorflow as tf
-from PIL import Image
 
 # This is needed since the notebook is stored in the object_detection folder.
 sys.path.append("..")
@@ -88,7 +87,8 @@ for filename in onlyfiles:
         image_expanded = np.expand_dims(image, axis=0)
 
         # Perform the actual detection by running the model with the image as input
-        (boxes, scores, classes, num) = sess.run([detection_boxes, detection_scores, detection_classes, num_detections],feed_dict={image_tensor: image_expanded})
+        (boxes, scores, classes, num) = sess.run([detection_boxes, detection_scores, detection_classes, num_detections],
+                                                 feed_dict={image_tensor: image_expanded})
 
         # Draw the results of the detection (aka 'visulaize the results')
         image1, array_coord = vis_util.visualize_boxes_and_labels_on_image_array(image,
