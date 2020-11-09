@@ -2,10 +2,8 @@
 import os
 import sys
 
-import cv2
 import numpy as np
 import tensorflow as tf
-from PIL import Image
 
 # This is needed since the notebook is stored in the object_detection folder.
 sys.path.append("..")
@@ -16,8 +14,6 @@ from utils import visualization_utils as vis_util
 
 # Name of the directory containing the object detection module we're using
 MODEL_NAME = 'model'
-IMAGE_NAME = 'test_images/image5.png'
-OUTPUT_IMAGE_NAME = 'test_images/output5.png'
 
 # Grab path to current working directory
 CWD_PATH = os.getcwd()
@@ -28,10 +24,6 @@ PATH_TO_CKPT = os.path.join(CWD_PATH, MODEL_NAME, 'frozen_inference_graph.pb')
 
 # Path to label map file
 PATH_TO_LABELS = os.path.join(CWD_PATH, 'data', 'labelmap.pbtxt')
-
-# Path to image
-PATH_TO_IMAGE = os.path.join(CWD_PATH, IMAGE_NAME)
-OUTPUT_PATH = os.path.join(CWD_PATH, OUTPUT_IMAGE_NAME)
 
 # Number of classes the object detector can identify
 NUM_CLASSES = 1
@@ -73,48 +65,51 @@ detection_classes = detection_graph.get_tensor_by_name('detection_classes:0')
 # Number of objects detected
 num_detections = detection_graph.get_tensor_by_name('num_detections:0')
 
+
 # Load image using OpenCV and
 # expand image dimensions to have shape: [1, None, None, 3]
 # i.e. a single-column array, where each item in the column has the pixel RGB value
-image = cv2.imread(PATH_TO_IMAGE)
-image_expanded = np.expand_dims(image, axis=0)
 
-# Perform the actual detection by running the model with the image as input
-(boxes, scores, classes, num) = sess.run(
-    [detection_boxes, detection_scores, detection_classes, num_detections],
-    feed_dict={image_tensor: image_expanded})
+def get_card_from_image(image):
+    """
+    :param image: image = cv2.imread(image_path)
+    :return: {
+        "success": Boolean,
+        "output_image": OpenCv Image object,
+        "reason": Reason for failure in case success is False
+    }
+    """
 
-# Draw the results of the detection (aka 'visulaize the results')
-image, array_coord = vis_util.visualize_boxes_and_labels_on_image_array(
-    image,
-    np.squeeze(boxes),
-    np.squeeze(classes).astype(np.int32),
-    np.squeeze(scores),
-    category_index,
-    use_normalized_coordinates=True,
-    line_thickness=3,
-    min_score_thresh=0.60)
+    image_expanded = np.expand_dims(image, axis=0)
 
-ymin, xmin, ymax, xmax = array_coord
+    # Perform the actual detection by running the model with the image as input
+    (boxes, scores, classes, num) = sess.run([detection_boxes, detection_scores, detection_classes, num_detections],
+                                             feed_dict={image_tensor: image_expanded})
 
-shape = np.shape(image)
-im_width, im_height = shape[1], shape[0]
-(left, right, top, bottom) = (xmin * im_width, xmax * im_width, ymin * im_height, ymax * im_height)
+    # Draw the results of the detection (aka 'visulaize the results')
+    image1, array_coord = vis_util.visualize_boxes_and_labels_on_image_array(image,
+                                                                             np.squeeze(boxes),
+                                                                             np.squeeze(classes).astype(np.int32),
+                                                                             np.squeeze(scores),
+                                                                             category_index,
+                                                                             use_normalized_coordinates=True,
+                                                                             line_thickness=3,
+                                                                             min_score_thresh=0.60)
 
-# Using Image to crop and save the extracted copied image
-im = Image.open(PATH_TO_IMAGE)
-im.crop((left, top, right, bottom)).save(OUTPUT_PATH, quality=95)
+    ymin, xmin, ymax, xmax = array_coord
+    shape = np.shape(image1)
+    im_width, im_height = shape[1], shape[0]
+    (left, right, top, bottom) = (xmin * im_width, xmax * im_width, ymin * im_height, ymax * im_height)
 
-cv2.imshow('ID-CARD-DETECTOR : ', image)
-
-image_cropped = cv2.imread(OUTPUT_PATH)
-cv2.imshow("ID-CARD-CROPPED : ", image_cropped)
-
-# All the results have been drawn on image. Now display the image.
-cv2.imshow('ID CARD DETECTOR', image)
-
-# Press any key to close the image
-cv2.waitKey(0)
-
-# Clean up
-cv2.destroyAllWindows()
+    if ymin == xmax == xmin == ymax == 0:
+        return {
+            'success': False,
+            'output_image': image1,
+            'reason': 'Unable to detect image in card'
+        }
+    else:
+        cropped_image = image[int(top):int(bottom), int(left):int(right)]
+        return {
+            'success': True,
+            'output_image': cropped_image,
+        }
