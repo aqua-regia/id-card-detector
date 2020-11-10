@@ -54,3 +54,15 @@ python3 id_card_detection_image.py
 
 ![result](./static/result.png "result")  
 
+
+
+###For Developers
+
+* Version bump
+    ```bumpversion --current-version 1.2.0 minor setup.py```
+    
+* Publishing to PyPi
+    
+    1.`python setup.py sdist`
+    
+    2.`twine upload dist/* --verbose`
