@@ -10,8 +10,8 @@ import tensorflow as tf
 sys.path.append("..")
 
 # Import utilites
-from utils_extractor import label_map_util
-from utils_extractor import visualization_utils as vis_util
+from id_card_extractor.utils_extractor import label_map_util
+from id_card_extractor.utils_extractor import visualization_utils as vis_util
 
 # Path to frozen detection graph .pb file, which contains the model that is used
 # for object detection.
