@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="id_card_extractor",
-    version="1.1.0",
+    version="1.1.2",
     description="Crop id card from an image using OpenCV",
     long_description=README,
     long_description_content_type="text/markdown",
