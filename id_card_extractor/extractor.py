@@ -1,8 +1,6 @@
 # Import packages
 import os
 import sys
-from os import listdir
-from os.path import isfile, join
 
 import cv2
 import numpy as np
@@ -68,64 +66,60 @@ detection_classes = detection_graph.get_tensor_by_name('detection_classes:0')
 # Number of objects detected
 num_detections = detection_graph.get_tensor_by_name('num_detections:0')
 
+
 # Load image using OpenCV and
 # expand image dimensions to have shape: [1, None, None, 3]
 # i.e. a single-column array, where each item in the column has the pixel RGB value
 
-# Path to image
-DIRECTORY_NAME = 'test_images'
+def get_card_from_image(image):
+    """
+    :param image: image = cv2.imread(image_path)
+    :return: {
+        "success": Boolean,
+        "output_image": OpenCv Image object,
+        "reason": Reason for failure in case success is False
+    }
+    """
 
-DIRECTORY_PATH = os.path.join(CWD_PATH, DIRECTORY_NAME)
+    image_expanded = np.expand_dims(image, axis=0)
 
-onlyfiles = [f for f in listdir(DIRECTORY_PATH) if isfile(join(DIRECTORY_PATH, f))]
+    # Perform the actual detection by running the model with the image as input
+    (boxes, scores, classes, num) = sess.run([detection_boxes, detection_scores, detection_classes, num_detections],
+                                             feed_dict={image_tensor: image_expanded})
 
-for filename in onlyfiles:
+    # Draw the results of the detection (aka 'visulaize the results')
+    image1, array_coord = vis_util.visualize_boxes_and_labels_on_image_array(image,
+                                                                             np.squeeze(boxes),
+                                                                             np.squeeze(classes).astype(np.int32),
+                                                                             np.squeeze(scores),
+                                                                             category_index,
+                                                                             use_normalized_coordinates=True,
+                                                                             line_thickness=3,
+                                                                             min_score_thresh=0.60)
 
-    try:
-        image_path = DIRECTORY_PATH + "/" + filename
-        image = cv2.imread(image_path)
-        image_expanded = np.expand_dims(image, axis=0)
+    ymin, xmin, ymax, xmax = array_coord
+    shape = np.shape(image1)
+    im_width, im_height = shape[1], shape[0]
+    (left, right, top, bottom) = (xmin * im_width, xmax * im_width, ymin * im_height, ymax * im_height)
 
-        # Perform the actual detection by running the model with the image as input
-        (boxes, scores, classes, num) = sess.run([detection_boxes, detection_scores, detection_classes, num_detections],
-                                                 feed_dict={image_tensor: image_expanded})
+    if ymin == xmax == xmin == ymax == 0:
+        return {
+            'success': False,
+            'output_image': image1,
+            'reason': 'Unable to detect image in card'
+        }
+    else:
+        cropped_image = image[int(top):int(bottom), int(left):int(right)]
+        return {
+            'success': True,
+            'output_image': cropped_image,
+        }
 
-        # Draw the results of the detection (aka 'visulaize the results')
-        image1, array_coord = vis_util.visualize_boxes_and_labels_on_image_array(image,
-                                                                                 np.squeeze(boxes),
-                                                                                 np.squeeze(classes).astype(np.int32),
-                                                                                 np.squeeze(scores),
-                                                                                 category_index,
-                                                                                 use_normalized_coordinates=True,
-                                                                                 line_thickness=3,
-                                                                                 min_score_thresh=0.60)
 
-        ymin, xmin, ymax, xmax = array_coord
-        shape = np.shape(image1)
-        im_width, im_height = shape[1], shape[0]
-        (left, right, top, bottom) = (xmin * im_width, xmax * im_width, ymin * im_height, ymax * im_height)
-
-        print(f"image is:- {filename}")
-        # cv2.imshow("original", image)
-
-        if ymin == xmax == xmin == ymax == 0:
-            output_image_path = DIRECTORY_PATH + "/ignored/" + filename
-            cv2.imwrite(output_image_path, image1)
-            continue
-        else:
-            output_image_path = DIRECTORY_PATH + "/detected/" + filename
-            cropped_image = image[int(top):int(bottom), int(left):int(right)]
-            cv2.imwrite(output_image_path, cropped_image)
-            # cv2.imshow('ID CARD DETECTOR', cropped_image)
-            cv2.waitKey(0)
-
-    except Exception as e:
-        print(e)
-        print(f"some exception occured with image:- {DIRECTORY_PATH + '/' + filename}")
-        continue
-
-    # Press any key to close the image
-    cv2.waitKey(0)
-
-    # Clean up
-    cv2.destroyAllWindows()
+if __name__ == '__main__':
+    test_image_filepath = '/Users/syedhassanashraf/Documents/python/extractor/test/image1.png'
+    image = cv2.imread(test_image_filepath)
+    cropped_image_response = get_card_from_image(image)
+    if cropped_image_response['success']:
+        cv2.imshow("cropped_card", cropped_image_response['output_image'])
+        cv2.waitKey(0)
