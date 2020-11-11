@@ -1,1 +1,3 @@
-recursive-include id_card_extractor *
+recursive-include id_card_extractor *.py
+include id_card_extractor/data/labelmap.pbtxt
+include id_card_extractor/model/frozen_inference_graph.pb
