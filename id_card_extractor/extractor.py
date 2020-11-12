@@ -94,7 +94,7 @@ def get_card_from_image(image):
     ymin, xmin, ymax, xmax = array_coord
     shape = np.shape(image1)
     im_width, im_height = shape[1], shape[0]
-    (left, right, top, bottom) = (xmin * im_width, xmax * im_width, ymin * im_height, ymax * im_height)
+    (left, right, top, bottom) = (xmin * 0.5 * im_width, xmax * im_width * 1.25, ymin * im_height * 0.75, ymax * im_height * 1.15)
 
     if ymin == xmax == xmin == ymax == 0:
         return {
